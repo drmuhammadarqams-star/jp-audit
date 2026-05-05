@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JP Group — Pipeline Audit</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23050A14'/><text y='.9em' font-size='70' x='12'>🩸</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#050A14;--surface:#0C1526;--card:#0F1C35;
+  --border:rgba(212,168,67,.15);--gold:#D4A843;--gold2:#F0C96A;
+  --red:#D94F3D;--green:#2ABF7A;--text:#E8E2D4;--muted:#6B7A99;--blue:#4A9EFF;
+}
+#cur-dot,#cur-ring{position:fixed;top:0;left:0;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+#cur-dot{width:6px;height:6px;background:var(--gold);}
+#cur-ring{width:28px;height:28px;border:1.5px solid rgba(212,168,67,.5);transition:width .2s,height .2s,transform .15s;}
+body{cursor:none;background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+a,button{cursor:none;}
+#cosmos{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.wrap{position:relative;z-index:1;}
+
+header{padding:80px 48px 56px;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(12,21,38,.9) 0%,transparent 100%);}
+.eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--gold);opacity:.7;text-transform:uppercase;margin-bottom:20px;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(40px,6vw,72px);font-weight:900;color:var(--text);line-height:1;}
+.sub{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--muted);margin-top:12px;text-transform:uppercase;}
+.stats-row{display:flex;justify-content:center;gap:56px;margin-top:44px;flex-wrap:wrap;}
+.stat-n{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--gold);}
+.stat-l{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;text-transform:uppercase;}
+
+.problem-wrap{max-width:680px;margin:64px auto;padding:0 40px;text-align:center;}
+.problem-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:14px;}
+.problem-text{font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,26px);font-weight:400;line-height:1.6;color:var(--text);}
+.problem-text em{color:var(--gold);font-style:normal;font-weight:700;}
+
+.div-row{display:flex;align-items:center;gap:20px;max-width:1100px;margin:0 auto 40px;padding:0 40px;}
+.div-line{flex:1;height:1px;background:var(--border);}
+.div-txt{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;white-space:nowrap;}
+
+.grid{max-width:1140px;margin:0 auto;padding:0 40px 80px;display:flex;flex-direction:column;gap:18px;}
+.col-heads{display:grid;grid-template-columns:1fr 56px 1fr;gap:16px;}
+.col-head{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;padding:8px 14px;border-radius:6px;text-align:center;}
+.col-head.b{color:var(--red);background:rgba(217,79,61,.06);border:1px solid rgba(217,79,61,.2);}
+.col-head.a{color:var(--green);background:rgba(42,191,122,.06);border:1px solid rgba(42,191,122,.2);}
+
+.row{display:grid;grid-template-columns:1fr 56px 1fr;gap:16px;align-items:stretch;}
+.card{background:var(--card);border-radius:14px;padding:26px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.04);transition:transform .2s,box-shadow .2s;opacity:0;animation:up .5s ease forwards;}
+.card:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.4);}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.card.b::before{background:linear-gradient(90deg,var(--red),transparent);}
+.card.a::before{background:linear-gradient(90deg,var(--green),transparent);}
+@keyframes up{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.row:nth-child(2) .card{animation-delay:.1s;}
+.row:nth-child(3) .card{animation-delay:.2s;}
+.row:nth-child(4) .card{animation-delay:.3s;}
+.row:nth-child(5) .card{animation-delay:.4s;}
+.row:nth-child(6) .card{animation-delay:.5s;}
+.row:nth-child(7) .card{animation-delay:.6s;}
+.row:nth-child(8) .card{animation-delay:.7s;}
+
+.n{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;opacity:.04;position:absolute;top:8px;right:14px;line-height:1;color:var(--text);}
+.section-tag{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;}
+.b .section-tag{color:var(--red);}
+.a .section-tag{color:var(--green);}
+.ann{display:flex;align-items:flex-start;gap:6px;margin-bottom:8px;}
+.ann svg{flex-shrink:0;margin-top:3px;}
+.card-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--text);line-height:1.35;}
+.card-body{font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px;}
+.verdict{display:inline-block;margin-top:14px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;padding:4px 10px;border-radius:20px;}
+.b .verdict{color:var(--red);background:rgba(217,79,61,.1);border:1px solid rgba(217,79,61,.2);}
+.a .verdict{color:var(--green);background:rgba(42,191,122,.08);border:1px solid rgba(42,191,122,.2);}
+.arr{display:flex;align-items:center;justify-content:center;}
+
+.mindset{max-width:660px;margin:0 auto 40px;padding:36px 44px;background:var(--card);border:1px solid var(--gold);border-radius:18px;text-align:center;position:relative;overflow:hidden;}
+.mindset::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(212,168,67,.07) 0%,transparent 70%);}
+.mindset-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:20px;}
+.shift{display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;}
+.sf,.st{font-family:'Playfair Display',serif;font-size:17px;line-height:1.4;}
+.sf{color:var(--red);}.st{color:var(--green);}
+
+.cta-section{max-width:700px;margin:80px auto 100px;padding:0 40px;text-align:center;}
+.cta-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;}
+.cta-heading{font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,32px);color:var(--text);line-height:1.4;margin-bottom:12px;}
+.cta-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:36px;}
+.btn-audit{display:inline-flex;align-items:center;gap:12px;background:var(--gold);color:#050A14;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:16px 36px;border-radius:50px;border:none;font-weight:500;transition:background .2s,transform .2s,box-shadow .2s;}
+.btn-audit:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(212,168,67,.3);}
+
+#modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(5,10,20,.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;}
+#modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:44px 40px;max-width:560px;width:100%;position:relative;}
+.modal-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted);font-size:22px;line-height:1;}
+.modal-close:hover{color:var(--text);}
+.modal h2{font-family:'Playfair Display',serif;font-size:24px;color:var(--text);margin-bottom:6px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.form-group input,.form-group textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.form-group input:focus,.form-group textarea:focus{border-color:rgba(212,168,67,.4);}
+.form-group textarea{resize:vertical;min-height:100px;}
+.btn-send{width:100%;padding:14px;background:var(--gold);color:#050A14;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;border:none;border-radius:10px;font-weight:500;transition:background .2s;}
+.btn-send:hover{background:var(--gold2);}
+
+footer{text-align:center;padding:44px 40px;border-top:1px solid var(--border);}
+.foot-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+.foot-name{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);margin-top:8px;}
+.foot-pills{display:flex;justify-content:center;gap:12px;margin-top:14px;flex-wrap:wrap;}
+.pill{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);border:1px solid var(--border);padding:4px 12px;border-radius:20px;text-transform:uppercase;}
+
+@media(max-width:760px){.row,.col-heads{grid-template-columns:1fr;}.arr,.col-head.b{display:none;}}
+</style>
+</head>
+<body>
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+<canvas id="cosmos"></canvas>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2>Submit Your Audit Request</h2>
+    <p class="modal-sub">Send me your website. I'll diagnose the invisible bleed and send you the visual — section by section.</p>
+    <div class="form-group"><label>Your Name</label><input type="text" id="f-name" placeholder="Jeffrey Padesky"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="f-email" placeholder="jeff@yourfirm.com"></div>
+    <div class="form-group"><label>Website URL</label><input type="text" id="f-url" placeholder="https://yourwebsite.com"></div>
+    <div class="form-group"><label>What's the pain? (optional)</label>
+    <textarea id="f-msg">Hi Arqam, I'd like an audit of my pipeline. I found your diagnosis of JP Group and want to understand where my digital presence is bleeding.</textarea></div>
+    <button class="btn-send" onclick="sendAudit()">Send Audit Request →</button>
+  </div>
+</div>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Invisible Bleed Diagnosis</p>
+  <h1>JP Group</h1>
+  <p class="sub">Algonquin, Illinois · Pipeline Audit</p>
+  <div class="stats-row">
+    <div><div class="stat-n">250+</div><div class="stat-l">Homes Sold</div></div>
+    <div><div class="stat-n">$100M+</div><div class="stat-l">Total Volume</div></div>
+    <div><div class="stat-n">Top 2%</div><div class="stat-l">REAL Elite Nationwide</div></div>
+    <div><div class="stat-n">10 Yrs</div><div class="stat-l">Market Experience</div></div>
+  </div>
+</header>
+
+<div class="problem-wrap">
+  <div class="problem-tag">Core Problem Identified</div>
+  <p class="problem-text">Jeff built a <em>Top 2% nationwide</em> operation and founded his own title company. Then let a <em>generic template</em> represent it online. The moat is real. The frame is hiding it.</p>
+</div>
+
+<div class="div-row"><div class="div-line"></div><div class="div-txt">Before vs After — 7 Sections</div><div class="div-line"></div></div>
+
+<div class="grid">
+  <div class="col-heads">
+    <div class="col-head b">Current — The Bleed</div>
+    <div></div>
+    <div class="col-head a">Reconstructed — The Conviction</div>
+  </div>
+
+  <!-- ROW 1 -->
+  <div class="row">
+    <div class="card b"><div class="n">1</div><div class="section-tag">Hero</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 15 Q5 3 15 3" stroke="#D94F3D" stroke-width="1.5" stroke-linecap="round" fill="none" stroke-dasharray="2 2"/><path d="M13 1 L15 3 L13 5" stroke="#D94F3D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><div class="card-title">"Confidence in Every Transaction"</div></div>
+      <div class="card-body">Every agency in Chicagoland says this. No differentiation. No authority. Visitor finds no reason to stay.</div>
+      <div class="verdict">Zero Authority Signal</div>
+    </div>
+    <div class="arr"><svg width="36" height="20" viewBox="0 0 36 20"><path d="M2 10 Q18 3 34 10" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/><path d="M30 7 L34 10 L30 13" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="card a"><div class="n">1</div><div class="section-tag">Hero</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#2ABF7A" stroke-width="1.5" stroke-dasharray="2 2"/><path d="M6 9 L8 11 L12 7" stroke="#2ABF7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="card-title">"Chicagoland's Top 2% Agent — With His Own Title Company."</div></div>
+      <div class="card-body">Immediate authority. Immediate moat. Visitor knows in 3 seconds exactly why they're here and nowhere else.</div>
+      <div class="verdict">Moat Visible. Differentiated.</div>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="row">
+    <div class="card b"><div class="n">2</div><div class="section-tag">Value Proposition</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4 L14 14 M14 4 L4 14" stroke="#D94F3D" stroke-width="1.5" stroke-linecap="round"/></svg><div class="card-title">"Local Expertise. Regional Reach."</div></div>
+      <div class="card-body">Every boutique firm says this. Talks about JP Group — not the buyer outcome. Invisible value.</div>
+      <div class="verdict">Commodity Messaging</div>
+    </div>
+    <div class="arr"><svg width="36" height="20" viewBox="0 0 36 20"><path d="M2 10 Q18 3 34 10" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/><path d="M30 7 L34 10 L30 13" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="card a"><div class="n">2</div><div class="section-tag">Value Proposition</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#2ABF7A" stroke-width="1.5" stroke-dasharray="2 2"/><path d="M6 9 L8 11 L12 7" stroke="#2ABF7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="card-title">"One Agent. The Deal and the Closing."</div></div>
+      <div class="card-body">JP Title is the moat. Jeff controls both sides — speed, savings, zero friction. That's the outcome. Say that first.</div>
+      <div class="verdict">Outcome First. Proof Built In.</div>
+    </div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="row">
+    <div class="card b"><div class="n">3</div><div class="section-tag">Social Proof</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2 L9 15 M4 8 L9 3 L14 8" stroke="#D94F3D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><div class="card-title">250+ · $100M+ · $1M Highest Sale</div></div>
+      <div class="card-body">Numbers float without context. No client type, no deal story. Résumé — not proof.</div>
+      <div class="verdict">Stats Without Story</div>
+    </div>
+    <div class="arr"><svg width="36" height="20" viewBox="0 0 36 20"><path d="M2 10 Q18 3 34 10" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/><path d="M30 7 L34 10 L30 13" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="card a"><div class="n">3</div><div class="section-tag">Social Proof</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#2ABF7A" stroke-width="1.5" stroke-dasharray="2 2"/><path d="M6 9 L8 11 L12 7" stroke="#2ABF7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="card-title">Visual Deal Gallery — Real Properties, Real Outcomes.</div></div>
+      <div class="card-body">Show the $1M South Barrington close. Show the relocation families. Buyers see themselves — not a spreadsheet.</div>
+      <div class="verdict">Recognition Before Relevance</div>
+    </div>
+  </div>
+
+  <!-- ROW 4 -->
+  <div class="row">
+    <div class="card b"><div class="n">4</div><div class="section-tag">Authority Signal</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2 L11 7 L16 7 L12 11 L14 16 L9 13 L4 16 L6 11 L2 7 L7 7 Z" stroke="#D94F3D" stroke-width="1.2" fill="none" stroke-dasharray="2 1.5"/></svg><div class="card-title">REAL Elite Top 2% — Mentioned Only on LinkedIn.</div></div>
+      <div class="card-body">The biggest authority badge in Chicagoland. Not on homepage. Not above the fold. Website is completely silent.</div>
+      <div class="verdict">Authority Hidden Behind Frame</div>
+    </div>
+    <div class="arr"><svg width="36" height="20" viewBox="0 0 36 20"><path d="M2 10 Q18 3 34 10" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/><path d="M30 7 L34 10 L30 13" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="card a"><div class="n">4</div><div class="section-tag">Authority Signal</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2 L11 7 L16 7 L12 11 L14 16 L9 13 L4 16 L6 11 L2 7 L7 7 Z" stroke="#2ABF7A" stroke-width="1.2" fill="none"/></svg><div class="card-title">"REAL Elite — Top 2% Nationwide, 2025." Above the fold.</div></div>
+      <div class="card-body">Before they read anything — they see the badge. Earns the rest of the page before a single word is read.</div>
+      <div class="verdict">Lead With The Badge</div>
+    </div>
+  </div>
+
+  <!-- ROW 5 -->
+  <div class="row">
+    <div class="card b"><div class="n">5</div><div class="section-tag">Competitive Moat</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="4" y="4" width="10" height="10" rx="2" stroke="#D94F3D" stroke-width="1.2" fill="none" stroke-dasharray="2 1.5"/><path d="M9 7 L9 11 M7 9 L11 9" stroke="#D94F3D" stroke-width="1.2" stroke-linecap="round"/></svg><div class="card-title">JP Title Partners — Not Mentioned Once.</div></div>
+      <div class="card-body">Jeff built an entire title company to control the closing. No other Chicagoland agent has this. Website: complete silence.</div>
+      <div class="verdict">Moat Completely Hidden</div>
+    </div>
+    <div class="arr"><svg width="36" height="20" viewBox="0 0 36 20"><path d="M2 10 Q18 3 34 10" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/><path d="M30 7 L34 10 L30 13" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="card a"><div class="n">5</div><div class="section-tag">Competitive Moat</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#2ABF7A" stroke-width="1.5" stroke-dasharray="2 2"/><path d="M6 9 L8 11 L12 7" stroke="#2ABF7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="card-title">"The Only Agent Who Controls the Closing Too."</div></div>
+      <div class="card-body">Dedicated JP Title section — faster closes, fewer surprises, one contact. Zero competitors can replicate this.</div>
+      <div class="verdict">Moat Made Visible</div>
+    </div>
+  </div>
+
+  <!-- ROW 6 -->
+  <div class="row">
+    <div class="card b"><div class="n">6</div><div class="section-tag">LinkedIn Presence</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9 Q9 2 15 9 Q9 16 3 9Z" stroke="#D94F3D" stroke-width="1.2" fill="none" stroke-dasharray="2 1.5"/></svg><div class="card-title">AI Writes About Him. In Third Person.</div></div>
+      <div class="card-body">"Jeff Padesky and The JP Group emphasize..." — visitors feel the AI instantly. 10 years of trust dissolves in 8 seconds.</div>
+      <div class="verdict">Trust Leak</div>
+    </div>
+    <div class="arr"><svg width="36" height="20" viewBox="0 0 36 20"><path d="M2 10 Q18 3 34 10" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/><path d="M30 7 L34 10 L30 13" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="card a"><div class="n">6</div><div class="section-tag">LinkedIn Presence</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#2ABF7A" stroke-width="1.5" stroke-dasharray="2 2"/><path d="M6 9 L8 11 L12 7" stroke="#2ABF7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="card-title">First Person. Real Deals. Human Voice.</div></div>
+      <div class="card-body">"We closed a $1M property last week. Here's what the buyer almost missed..." — the voice that earns referrals in Chicago.</div>
+      <div class="verdict">Authority Through Authenticity</div>
+    </div>
+  </div>
+
+  <!-- ROW 7 -->
+  <div class="row">
+    <div class="card b"><div class="n">7</div><div class="section-tag">Call to Action</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 14 L14 4 M14 4 L8 4 M14 4 L14 10" stroke="#D94F3D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="card-title">"Work With Us — Contact Us"</div></div>
+      <div class="card-body">No urgency. No specific outcome. No reason to move now. Buyer clicks away and calls whoever is second in Google.</div>
+      <div class="verdict">Friction. No Motive.</div>
+    </div>
+    <div class="arr"><svg width="36" height="20" viewBox="0 0 36 20"><path d="M2 10 Q18 3 34 10" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/><path d="M30 7 L34 10 L30 13" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="card a"><div class="n">7</div><div class="section-tag">Call to Action</div>
+      <div class="ann"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#2ABF7A" stroke-width="1.5" stroke-dasharray="2 2"/><path d="M6 9 L8 11 L12 7" stroke="#2ABF7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="card-title">"Book a Strategy Call — Know Your Number Before the Market Does."</div></div>
+      <div class="card-body">Specific. Outcome-driven. Tells the buyer exactly what they get from 20 minutes. A reason to act now.</div>
+      <div class="verdict">Simple. Clear. Actionable.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MINDSET -->
+<div style="padding:0 40px;display:flex;justify-content:center;">
+  <div class="mindset">
+    <div class="mindset-tag">The Mindset Shift Required</div>
+    <div class="shift">
+      <div class="sf">Telling what<br>JP Group does</div>
+      <svg width="48" height="20" viewBox="0 0 48 20"><path d="M2 10 Q24 2 46 10" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/><path d="M42 7 L46 10 L42 13" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      <div class="st">Proving what<br>the buyer gets</div>
+    </div>
+    <p style="margin-top:18px;font-size:12px;color:var(--muted);line-height:1.7;">The authority exists. The moat exists. The proof exists.<br>The frame is hiding all of it.</p>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-label">Is Your Pipeline Bleeding Too?</div>
+  <h2 class="cta-heading">Your authority may be hiding<br>behind the wrong frame.</h2>
+  <p class="cta-sub">I diagnose the exact sections where qualified buyers disappear — before they ever reach you. Send me your website and I'll show you the bleed.</p>
+  <button class="btn-audit" onclick="openModal()">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4.5 L7 9.5 M4.5 7 L7 9.5 L9.5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Submit Your Audit Request
+  </button>
+</div>
+
+<footer>
+  <div class="foot-tag">Diagnosed by</div>
+  <div class="foot-name">Muhammad Arqam Sultan</div>
+  <div class="foot-pills">
+    <div class="pill">B2B Pipeline Diagnostician</div>
+    <div class="pill">Buyer Psychology</div>
+    <div class="pill">Intake Architecture</div>
+  </div>
+</footer>
+</div>
+
+<script>
+// CURSOR
+const dot=document.getElementById('cur-dot'),ring=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function a(){rx+=(mx-rx)*.18;ry+=(my-ry)*.18;dot.style.left=mx+'px';dot.style.top=my+'px';ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(a);})();
+document.querySelectorAll('button,a').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='44px';ring.style.height='44px';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='28px';ring.style.height='28px';});
+});
+
+// SPACE
+const cvs=document.getElementById('cosmos'),ctx=cvs.getContext('2d');
+let W,H,stars=[];
+function resize(){W=cvs.width=window.innerWidth;H=cvs.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+for(let i=0;i<240;i++)stars.push({x:Math.random(),y:Math.random(),r:Math.random()*.9+.2,a:Math.random(),sp:Math.random()*.0003+.0001,dr:Math.random()*.00015*(Math.random()<.5?1:-1)});
+(function draw(){
+  ctx.clearRect(0,0,W,H);
+  stars.forEach(s=>{
+    s.a+=s.sp;if(s.a>1)s.a=0;s.x+=s.dr;if(s.x<0)s.x=1;if(s.x>1)s.x=0;
+    const p=.3+Math.abs(Math.sin(s.a*Math.PI))*.5;
+    ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(212,168,67,${p*.3})`;ctx.fill();
+  });
+  const g=ctx.createRadialGradient(W*.5,H*.3,0,W*.5,H*.3,W*.5);
+  g.addColorStop(0,'rgba(74,158,255,.02)');g.addColorStop(1,'transparent');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  requestAnimationFrame(draw);
+})();
+
+// MODAL
+function openModal(){document.getElementById('modal-overlay').classList.add('open');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+function sendAudit(){
+  const name=document.getElementById('f-name').value||'';
+  const email=document.getElementById('f-email').value||'';
+  const url=document.getElementById('f-url').value||'';
+  const msg=document.getElementById('f-msg').value||'';
+  const s=encodeURIComponent('Audit Request — '+(name||'Potential Client'));
+  const b=encodeURIComponent('Name: '+name+'\nEmail: '+email+'\nWebsite: '+url+'\n\nMessage:\n'+msg);
+  window.location.href='mailto:drmuhammadarqams@gmail.com?subject='+s+'&body='+b;
+  closeModal();
+}
+</script>
+</body>
+</html>
