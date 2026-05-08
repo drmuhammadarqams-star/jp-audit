@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYNDICATE // TERMINAL ACCESS</title>
+
+<!-- FAVICON: All-Seeing Eye / Illuminati Triangle -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,90 5,90' fill='%23000' stroke='%23E2B04D' stroke-width='4'/><ellipse cx='50' cy='62' rx='14' ry='9' fill='%23E2B04D'/><circle cx='50' cy='62' r='6' fill='%23000'/><circle cx='50' cy='62' r='2.5' fill='%23E2B04D'/><line x1='50' y1='5' x2='50' y2='38' stroke='%23E2B04D' stroke-width='1.5' opacity='0.5'/><line x1='5' y1='90' x2='36' y2='68' stroke='%23E2B04D' stroke-width='1.5' opacity='0.5'/><line x1='95' y1='90' x2='64' y2='68' stroke='%23E2B04D' stroke-width='1.5' opacity='0.5'/></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;800&family=Playfair+Display:ital,wght@1,900&family=Caveat:wght@700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #010204;
+  --card: rgba(10, 12, 16, 0.85);
+  --accent: #E2B04D; 
+  --rust: #FF3E3E; 
+  --sage: #00FF95; 
+  --text: #E2E8F0;
+  --sub: #64748B;
+  --glitch: rgba(226, 176, 77, 0.2);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; 
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><defs><filter id='g'><feGaussianBlur stdDeviation='0.4'/></filter></defs><g filter='url(%23g)'><path d='M16 1 L17.5 6 L22 5 L19 9 L24 11 L19 13 L22 17 L17.5 16 L16 21 L14.5 16 L10 17 L13 13 L8 11 L13 9 L10 5 L14.5 6 Z' fill='%23E2B04D' stroke='%23000' stroke-width='0.6'/><circle cx='16' cy='11' r='1.4' fill='%23000'/><path d='M16 12 L16 30' stroke='%23E2B04D' stroke-width='1.2'/><path d='M14 28 L18 28' stroke='%23E2B04D' stroke-width='1.2'/></g></svg>") 16 16, crosshair;
+}
+
+a, button, .node, #cta-node {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'><g><path d='M17 2 L19 7 L24 6 L21 10 L26 13 L21 15 L24 19 L19 18 L17 23 L15 18 L10 19 L13 15 L8 13 L13 10 L10 6 L15 7 Z' fill='%2300FF95' stroke='%23000' stroke-width='0.8'/><circle cx='17' cy='12.5' r='1.6' fill='%23000'/><path d='M17 14 L17 32' stroke='%2300FF95' stroke-width='1.4'/><path d='M14 30 L20 30' stroke='%2300FF95' stroke-width='1.4'/></g></svg>") 17 17, pointer;
+}
+
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  font-size: 16px;
+}
+
+/* STARFIELD */
+#canvas-stars {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(circle at center, #0a0c10 0%, #010204 100%);
+}
+
+/* SCANLINE */
+body::after {
+  content: " ";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+              linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 4px, 3px 100%;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.page {
+  max-width: 1200px;
+  margin: auto;
+  padding: 60px 20px;
+  position: relative;
+  z-index: 2;
+}
+
+/* HERO - MAIN STATEMENT */
+.hero { 
+  text-align: center; 
+  margin-bottom: 100px;
+  padding: 40px;
+  background: rgba(226, 176, 77, 0.05);
+  border: 1px solid rgba(226, 176, 77, 0.2);
+  border-radius: 4px;
+  position: relative;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 800px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 800px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.hero .status { 
+  font-size: 14px;
+  color: var(--accent); 
+  letter-spacing: 4px; 
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px var(--accent);
+  font-weight: 500;
+}
+
+.hero h1 { 
+  font-family: 'Playfair Display', serif; 
+  font-size: clamp(52px, 9vw, 90px);
+  font-style: italic;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: var(--text);
+  font-weight: 900;
+}
+
+.hero span { color: var(--accent); }
+
+.subhero-text { 
+  font-size: 20px; 
+  color: var(--accent); 
+  margin-top: 20px; 
+  letter-spacing: 2px;
+  font-weight: 600;
+} 
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 60px;
+}
+
+/* NODES */
+.node {
+  background: var(--card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 30px;
+  width: 300px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.node::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 2px;
+  background: var(--sub);
+  opacity: 0.2;
+}
+
+.node:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 25px rgba(226, 176, 77, 0.15);
+  transform: translateY(-4px) scale(1.02);
+}
+
+.node.input { border-left: 3px solid var(--accent); }
+.node.problem { border-left: 3px solid var(--rust); }
+.node.solution { border-left: 3px solid var(--sage); }
+.node.output { border-left: 3px solid var(--sage); }
+
+.title { 
+  font-size: 20px; 
+  font-weight: 800; 
+  letter-spacing: 1px; 
+  color: #fff;
+  text-align: center;
+}
+
+.sub { 
+  font-size: 14px; 
+  color: var(--sage); 
+  margin-top: 12px; 
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* SECTION HEADERS */
+.section-header {
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 52px;
+  font-style: italic;
+  margin: 80px 0 40px 0;
+  color: var(--accent);
+  font-weight: 900;
+  position: relative;
+}
+
+.section-header::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  max-width: 600px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.section-header::after {
+  content: "";
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  max-width: 600px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.section-subtext {
+  text-align: center;
+  color: var(--sage);
+  font-size: 16px;
+  margin-bottom: 50px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* THE CONFUSED STATE */
+.confused-box {
+  background: #fff;
+  color: #000;
+  padding: 60px 50px;
+  width: 100%;
+  max-width: 700px;
+  margin: 80px auto;
+  text-align: center;
+  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  position: relative;
+}
+
+.confused-box::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.confused-box::after {
+  content: "";
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+/* TRANSITION */
+.transition-text {
+  text-align: center;
+  font-size: 40px;
+  font-style: italic;
+  margin: 100px 0 50px 0;
+  color: var(--accent);
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  position: relative;
+}
+
+.transition-text::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  max-width: 700px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.transition-text .highlight {
+  color: var(--sage);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* SOLUTION NODE */
+#solution-node {
+  background: #000;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 40px rgba(226, 176, 77, 0.25);
+  width: 100%;
+  max-width: 600px;
+  padding: 50px;
+  position: relative;
+}
+
+#solution-node::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sage), transparent);
+}
+
+#solution-node::after {
+  content: "";
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sage), transparent);
+}
+
+#solution-node .title {
+  font-size: 28px;
+  color: var(--sage);
+  font-weight: 900;
+}
+
+/* CTA NODE */
+#cta-node {
+  background: transparent;
+  border: 2px solid var(--sage);
+  color: var(--sage);
+  text-align: center;
+  animation: breathe 3s infinite;
+  width: 100%;
+  max-width: 550px;
+  padding: 50px;
+  cursor: pointer;
+  position: relative;
+}
+
+#cta-node::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sage), transparent);
+}
+
+#cta-node::after {
+  content: "";
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sage), transparent);
+}
+
+#cta-node:hover {
+  box-shadow: 0 0 50px rgba(0, 255, 149, 0.4) !important;
+  transform: scale(1.04);
+}
+
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 25px rgba(0, 255, 149, 0.25); }
+  50% { box-shadow: 0 0 50px rgba(0, 255, 149, 0.4); }
+}
+
+/* ANNOTATIONS */
+.note {
+  font-family: 'Caveat', cursive;
+  position: absolute;
+  font-size: 24px;
+  color: var(--accent);
+  pointer-events: none;
+  filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));
+  line-height: 1.2;
+}
+
+svg#svg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* OUTCOME */
+.outcome {
+  text-align: center;
+  padding: 50px;
+  margin-top: 100px;
+  background: rgba(0, 255, 149, 0.08);
+  border: 1px solid rgba(0, 255, 149, 0.3);
+  border-radius: 4px;
+  position: relative;
+}
+
+.outcome::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 800px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sage), transparent);
+}
+
+.outcome-text {
+  font-size: 24px;
+  color: var(--sage);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* ============================================
+   BOOK PAGES HORIZONTAL SCROLL SECTION
+   ============================================ */
+
+.book-scroll-section {
+  position: relative;
+  margin: 80px -20px 0 -20px;
+  padding: 0 20px;
+}
+
+.book-scroll-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Unlock badge - top right corner */
+.unlock-badge {
+  position: absolute;
+  top: -32px;
+  right: 20px;
+  background: var(--accent);
+  color: #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  padding: 16px 32px;
+  border-radius: 3px;
+  z-index: 20;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 0 30px rgba(226, 176, 77, 0.6), 0 0 60px rgba(226, 176, 77, 0.3);
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(226, 176, 77, 0.6), 0 0 60px rgba(226, 176, 77, 0.3); transform: scale(1); }
+  50% { box-shadow: 0 0 50px rgba(226, 176, 77, 0.9), 0 0 100px rgba(226, 176, 77, 0.5); transform: scale(1.04); }
+}
+
+/* Fade edges on desktop */
+.book-scroll-wrapper::before,
+.book-scroll-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 20px;
+  width: 60px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.book-scroll-wrapper::before {
+  left: 0;
+  background: linear-gradient(to right, #010204, transparent);
+}
+
+.book-scroll-wrapper::after {
+  right: 0;
+  background: linear-gradient(to left, #010204, transparent);
+}
+
+/* Scroll track - infinite auto scroll */
+.book-scroll-outer {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.book-scroll-track {
+  display: flex;
+  gap: 14px;
+  padding: 24px 0 32px 0;
+  width: max-content;
+  animation: autoScroll 30s linear infinite;
+}
+
+.book-scroll-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes autoScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Individual page card */
+.book-page-card {
+  flex: 0 0 auto;
+  width: 200px;
+  height: 280px;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(226, 176, 77, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  background: #0a0c10;
+  /* Image protection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.book-page-card:hover {
+  transform: translateY(-8px) scale(1.04);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 20px rgba(226, 176, 77, 0.15);
+  border-color: rgba(226, 176, 77, 0.4);
+}
+
+.book-page-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  transition: transform 0.4s ease;
+  /* Disable drag & copy */
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
+
+.book-page-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Transparent overlay to block right-click on cards */
+.book-page-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: transparent;
+}
+
+/* Scroll hint arrow */
+.scroll-hint {
+  text-align: center;
+  color: var(--sub);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 8px;
+  opacity: 0.6;
+}
+
+/* Mobile responsive */
+@media(max-width: 768px) {
+  .node { width: 100%; }
+  .note { display: none; }
+  .section-header { font-size: 40px; }
+  .confused-box { font-size: 28px; padding: 40px 30px; }
+  #solution-node, #cta-node { width: 100%; max-width: 100%; }
+  .hero h1 { font-size: 48px; }
+
+  /* Mobile scroll adjustments */
+  .book-page-card {
+    width: 150px;
+    height: 210px;
+  }
+
+  .book-scroll-track {
+    padding: 20px 20px 28px 20px;
+    gap: 10px;
+  }
+
+  .book-scroll-wrapper::before,
+  .book-scroll-wrapper::after {
+    width: 30px;
+  }
+
+  .unlock-badge {
+    font-size: 10px;
+    padding: 6px 12px;
+    right: 10px;
+  }
+}
+</style>
+</head>
+
+<body>
+<canvas id="canvas-stars"></canvas>
+
+<div class="page" id="page">
+  <svg id="svg-canvas"></svg>
+
+  <!-- HERO: MAIN PROBLEM STATEMENT -->
+  <div class="hero">
+    <div class="status">// SEEKER, YOU ARE LOST</div>
+    <h1>Ancient Wisdom<br>Feels Like <span>Riddles</span></h1>
+    <div class="subhero-text">You decode the symbols. You wield no power.</div>
+  </div>
+
+  <!-- SECTION 1: THE INPUT (What you read) -->
+  <div class="section-header">What You Read</div>
+  <div class="section-subtext">Esoteric & Ancient Wisdom</div>
+
+  <div class="row">
+    <div class="node input" id="book-ego">
+      <div class="title">The Kybalion</div>
+      <div class="sub">Hermetic Principles</div>
+    </div>
+    <div class="node input" id="book-obstacle">
+      <div class="title">The Emerald Tablet</div>
+      <div class="sub">As Above, So Below</div>
+    </div>
+    <div class="node input" id="book-war">
+      <div class="title">Corpus Hermeticum</div>
+      <div class="sub">Divine Mind</div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: THE PROBLEM (What happens) -->
+  <div class="section-header">The Problem</div>
+  <div class="section-subtext">Knowledge becomes confusion</div>
+
+  <div class="row">
+    <div class="node problem" id="prob-1"><div class="title">Cryptic Symbolism</div></div>
+    <div class="node problem" id="prob-2"><div class="title">No Context</div></div>
+    <div class="node problem" id="prob-3"><div class="title">Cannot Apply</div></div>
+    <div class="node problem" id="prob-4"><div class="title">Lost in Allegory</div></div>
+  </div>
+
+  <!-- THE CONFUSION STATE -->
+  <div class="confused-box">
+    TOTAL MENTAL OVERLOAD
+  </div>
+
+  <!-- TRANSITION -->
+  <div class="transition-text">
+    But There Is A <span class="highlight">Way</span>
+  </div>
+
+  <!-- SECTION 3: THE SOLUTION (What we provide) -->
+  <div class="section-header">The Solution</div>
+  <div class="section-subtext">We integrate what books don't</div>
+
+  <div class="row" style="justify-content: center;">
+    <div class="node solution" id="solution-node" style="width: 100%; max-width: 600px; border-left: none; border: 2px solid var(--sage);">
+      <div class="title" style="color: var(--sage); font-size: 32px;">The Syndicate Slayer</div>
+      <div class="sub" style="color: var(--sage); margin-top: 15px;">Hermetic Integration System</div>
+      <div style="font-size: 16px; color: var(--text); margin-top: 25px; line-height: 1.8; font-weight: 500;">
+        Sacred maps that connect. Ancient logic decoded. A system the masters used.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: WHAT YOU GET (Outputs) -->
+  <div class="section-header">What You Get</div>
+  <div class="section-subtext">The complete integration system</div>
+
+  <div class="row">
+    <div class="node output" id="output-1">
+      <div class="title">Mind Maps</div>
+      <div class="sub">Sacred Geometry</div>
+    </div>
+    <div class="node output" id="output-2">
+      <div class="title">The Hidden History & Logic of Hermetic Wisdom</div>
+      <div class="sub">Tradition decoded</div>
+    </div>
+    <div class="node output" id="output-3">
+      <div class="title">Integration System</div>
+      <div class="sub">The Adept's Workbook</div>
+    </div>
+  </div>
+
+  <!-- FINAL CTA -->
+  <div class="section-header">Ready?</div>
+
+  <!-- Urgency bar -->
+  <div style="text-align:center; margin: 20px 0 40px 0;">
+    <span style="background: var(--rust); color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800; letter-spacing: 3px; padding: 10px 24px; border-radius: 2px; text-transform: uppercase; box-shadow: 0 0 20px rgba(255,62,62,0.4);">⚠ ONLY 4 COPIES LEFT — TODAY ONLY</span>
+  </div>
+
+  <div class="row" style="justify-content: center; margin-top: 20px; gap: 30px; position: relative;">
+
+    <!-- Connecting line between boxes -->
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30px; height: 2px; background: linear-gradient(90deg, var(--sage), var(--accent)); z-index: 10; display: none;" class="connector-line"></div>
+    <style>
+      @media(min-width: 769px) {
+        .connector-line { display: block !important; }
+      }
+    </style>
+
+    <!-- DIGITAL OPTION -->
+    <a href="https://whop.com/power-shadows-8027/5-books-400-pages-esocretic-power-and-wisdom/" style="text-decoration:none; width:100%; max-width:420px;">
+      <div class="node" id="cta-node" style="border: 2px solid var(--sage);">
+        <div style="font-size: 11px; color: var(--sage); letter-spacing: 4px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px;">⚡ INSTANT ACCESS</div>
+        <div class="title" style="font-size: 24px; color: var(--sage); font-weight: 900;">Digital Edition</div>
+        <div style="margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+          <span style="font-size: 20px; font-weight: 900; text-decoration: line-through; text-decoration-color: var(--rust); text-decoration-thickness: 3px; color: var(--sub);">$297</span>
+          <span style="font-size: 11px; color: var(--rust); font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">Calculate the discount →</span>
+        </div>
+        <!-- $31 also crossed out -->
+        <div style="margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+          <span style="font-size: 28px; font-weight: 900; text-decoration: line-through; text-decoration-color: var(--rust); text-decoration-thickness: 3px; color: var(--sub);">$31</span>
+          <span style="font-size: 11px; color: var(--sage); font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">First 5 Users Only</span>
+        </div>
+        <!-- Final price $24.80 -->
+        <div style="margin-top: 6px; font-family: 'Playfair Display', serif; font-style: italic; font-size: 52px; color: var(--accent); font-weight: 900; letter-spacing: 2px;">$24.80</div>
+        <div style="margin-top: 6px; color: var(--sage); font-size: 12px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase;">5 Books · 400+ Pages · Today Only</div>
+        <div style="margin-top: 16px; background: var(--sage); color: #000; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 900; letter-spacing: 3px; padding: 12px 28px; border-radius: 2px; text-transform: uppercase; display: inline-block;">
+          → GET INSTANT DIGITAL ←
+        </div>
+      </div>
+    </a>
+
+    <!-- PHYSICAL OPTION -->
+    <a href="https://whop.com/power-shadows-8027/5-hardcover-instant-digital-book-400-pages/" style="text-decoration:none; width:100%; max-width:420px;">
+      <div class="node" style="border: 2px solid var(--accent);">
+        <div style="font-size: 11px; color: var(--accent); letter-spacing: 4px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px;">📦 SHIPPED TO YOUR DOOR</div>
+        <div class="title" style="font-size: 24px; color: var(--accent); font-weight: 900;">Digital Edition + Hardcover</div>
+        <div style="margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+          <span style="font-size: 20px; font-weight: 900; text-decoration: line-through; text-decoration-color: var(--rust); text-decoration-thickness: 3px; color: var(--sub);">$297</span>
+          <span style="font-size: 11px; color: var(--rust); font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">Calculate the discount →</span>
+        </div>
+        <div style="margin-top: 8px; font-family: 'Playfair Display', serif; font-style: italic; font-size: 52px; color: var(--accent); font-weight: 900; letter-spacing: 2px;">$56.80</div>
+        <div style="margin-top: 6px; color: var(--accent); font-size: 12px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase;">5 Hardcover Books · 400+ Pages · + Digital</div>
+        <div style="margin-top: 16px; background: var(--accent); color: #000; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 900; letter-spacing: 3px; padding: 12px 28px; border-radius: 2px; text-transform: uppercase; display: inline-block;">
+          → GET PHYSICAL BOOK ←
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Decorative lines below CTA -->
+  <div style="position: relative; margin: 50px auto; max-width: 600px; text-align: center;">
+    <div style="width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent);"></div>
+    <div style="margin-top: 12px; width: 70%; margin-left: auto; margin-right: auto; height: 1px; background: linear-gradient(90deg, transparent, var(--sage), transparent);"></div>
+    <div style="margin-top: 12px; width: 40%; margin-left: auto; margin-right: auto; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent);"></div>
+  </div>
+
+  <!-- OUTCOME -->
+  <div class="outcome">
+    <div class="outcome-text">
+      From Lost Seeker → Awakened Adept
+    </div>
+  </div>
+
+  <!-- ============================================
+       BOOK PAGES HORIZONTAL SCROLL SECTION
+       ============================================ -->
+  <div class="book-scroll-section">
+    <div class="section-header">Inside The Book</div>
+    <div class="section-subtext">Flip through 400+ pages of ancient wisdom</div>
+
+    <div class="book-scroll-wrapper">
+      <div style="display: flex; gap: 10px; position: absolute; top: -24px; right: 20px; z-index: 20; flex-wrap: wrap; justify-content: flex-end;">
+        <a href="https://whop.com/power-shadows-8027/5-books-400-pages-esocretic-power-and-wisdom/" style="text-decoration:none;">
+          <div class="unlock-badge" style="top: 0; right: 0; position: relative; background: var(--sage);">⚡ DIGITAL — $31</div>
+        </a>
+        <a href="https://whop.com/power-shadows-8027/5-hardcover-instant-digital-book-400-pages/" style="text-decoration:none;">
+          <div class="unlock-badge" style="top: 0; right: 0; position: relative; background: var(--accent);">📦 PHYSICAL — $56.80</div>
+        </a>
+      </div>
+
+      <div class="book-scroll-track" id="bookScrollTrack">
+
+        <div class="book-page-card">
+          <img src="final%20a.jpeg" alt="Page A" loading="lazy">
+        </div>
+
+        <div class="book-page-card">
+          <img src="final%20b.jpeg" alt="Page B" loading="lazy">
+        </div>
+
+        <div class="book-page-card">
+          <img src="final%20c.jpeg" alt="Page C" loading="lazy">
+        </div>
+
+        <div class="book-page-card">
+          <img src="final%20d.jpeg" alt="Page D" loading="lazy">
+        </div>
+
+        <div class="book-page-card">
+          <img src="final%20e.jpeg" alt="Page E" loading="lazy">
+        </div>
+
+        <div class="book-page-card">
+          <img src="final%20f.jpeg" alt="Page F" loading="lazy">
+        </div>
+
+        <div class="book-page-card">
+          <img src="final%20g.jpeg" alt="Page G" loading="lazy">
+        </div>
+
+        <div class="book-page-card">
+          <img src="final%20h.jpeg" alt="Page H" loading="lazy">
+        </div>
+
+        <div class="book-page-card">
+          <img src="final%20i.jpeg" alt="Page I" loading="lazy">
+        </div>
+
+        <div class="book-page-card">
+          <img src="final%20j.jpeg" alt="Page J" loading="lazy">
+        </div>
+
+        <div class="book-page-card">
+          <img src="final%20k.jpeg" alt="Page K" loading="lazy">
+        </div>
+
+      </div><!-- end book-scroll-track -->
+
+      <div class="scroll-hint">← swipe to explore →</div>
+
+    </div><!-- end book-scroll-wrapper -->
+  </div>
+  <!-- END BOOK PAGES SCROLL SECTION -->
+
+</div>
+
+<script>
+const canvas = document.getElementById('canvas-stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function initStars() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  stars = [];
+  for (let i = 0; i < 200; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 1.5,
+      speed: Math.random() * 0.5
+    });
+  }
+}
+
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#fff";
+  stars.forEach(s => {
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+    ctx.fill();
+    s.y -= s.speed;
+    if (s.y < 0) s.y = canvas.height;
+  });
+  requestAnimationFrame(animateStars);
+}
+
+function pos(id){
+  const el = document.getElementById(id);
+  if(!el) return {x:0, y:0};
+  const r=el.getBoundingClientRect();
+  const p=document.getElementById('page').getBoundingClientRect();
+  return {x:r.left-p.left+r.width/2, y:r.top-p.top+r.height/2};
+}
+
+function curve(a, b, color, dash=false){
+  const svg=document.getElementById("svg-canvas");
+  const p1=pos(a), p2=pos(b);
+  
+  if(p1.x === 0 && p1.y === 0) return;
+  if(p2.x === 0 && p2.y === 0) return;
+  
+  const midY=(p1.y+p2.y)/2;
+
+  const path=document.createElementNS("http://www.w3.org/2000/svg","path");
+  path.setAttribute("d",`M${p1.x},${p1.y} C${p1.x},${midY} ${p2.x},${midY} ${p2.x},${p2.y}`);
+  path.setAttribute("stroke",color);
+  path.setAttribute("fill","none");
+  path.setAttribute("stroke-width","1.5");
+  path.setAttribute("opacity","0.4");
+  if(dash) path.setAttribute("stroke-dasharray", "4");
+
+  svg.appendChild(path);
+}
+
+function draw(){
+  const svg=document.getElementById("svg-canvas");
+  svg.innerHTML="";
+  
+  // Books → Problems
+  curve("book-ego", "prob-1", "#E2B04D", true);
+  curve("book-obstacle", "prob-2", "#E2B04D", true);
+  curve("book-war", "prob-3", "#E2B04D", true);
+  curve("prob-4", "prob-4", "#E2B04D", true);
+  
+  // Solution appears
+  curve("solution-node", "output-1", "#00FF95");
+  curve("solution-node", "output-2", "#00FF95");
+  curve("solution-node", "output-3", "#00FF95");
+  
+  // Outputs → CTA
+  curve("output-1", "cta-node", "#00FF95", true);
+  curve("output-2", "cta-node", "#00FF95", true);
+  curve("output-3", "cta-node", "#00FF95", true);
+}
+
+window.onload = () => { initStars(); animateStars(); draw(); };
+window.onresize = () => { initStars(); draw(); };
+
+// CTA Click handler - already handled by <a> tag wrapping
+
+// Mouse wheel horizontal scroll support for desktop
+const track = document.getElementById('bookScrollTrack');
+if (track) {
+  track.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      track.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
+}
+
+// AUTO-SCROLL: slow continuous scroll, pause on hover/touch
+let autoScrollActive = true;
+let autoScrollSpeed = 0.8; // pixels per frame
+let userInteracting = false;
+
+function autoScroll() {
+  if (track && autoScrollActive && !userInteracting) {
+    track.scrollLeft += autoScrollSpeed;
+    // Loop back to start when reaching end
+    if (track.scrollLeft >= track.scrollWidth - track.clientWidth - 2) {
+      track.scrollLeft = 0;
+    }
+  }
+  requestAnimationFrame(autoScroll);
+}
+
+if (track) {
+  // Pause on mouse enter, resume on mouse leave
+  track.addEventListener('mouseenter', () => { userInteracting = true; });
+  track.addEventListener('mouseleave', () => { userInteracting = false; });
+  // Pause on touch
+  track.addEventListener('touchstart', () => { userInteracting = true; }, { passive: true });
+  track.addEventListener('touchend', () => {
+    setTimeout(() => { userInteracting = false; }, 3000);
+  }, { passive: true });
+  // Start auto scroll
+  requestAnimationFrame(autoScroll);
+}
+
+// DISABLE RIGHT CLICK + COPY on all book page images
+document.querySelectorAll('.book-page-card img').forEach(img => {
+  img.addEventListener('contextmenu', e => e.preventDefault());
+  img.addEventListener('dragstart', e => e.preventDefault());
+  img.style.userSelect = 'none';
+  img.style.webkitUserSelect = 'none';
+  img.style.pointerEvents = 'none';
+});
+
+// Disable right click on entire scroll section
+const scrollSection = document.querySelector('.book-scroll-section');
+if (scrollSection) {
+  scrollSection.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+// ============================================
+// EGYPTIAN SUSPENSEFUL AMBIENT MUSIC
+// Web Audio API — no external file needed
+// Very slow, very low volume, mysterious
+// ============================================
+let audioCtx = null;
+let musicStarted = false;
+
+function startEgyptianMusic() {
+  if (musicStarted) return;
+  musicStarted = true;
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const masterGain = audioCtx.createGain();
+  masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+  masterGain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 4); // very low volume fade in
+  masterGain.connect(audioCtx.destination);
+
+  // Deep drone — low mysterious hum
+  function createDrone(freq, vol, detune) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.detune.setValueAtTime(detune || 0, audioCtx.currentTime);
+    
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+    
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+    osc.start();
+    return osc;
+  }
+
+  // Egyptian scale notes: D, E, F, G#, A, Bb, C#
+  // Base drone — very low
+  createDrone(55, 0.5);    // A1 deep rumble
+  createDrone(82.4, 0.3);  // E2 harmony
+  createDrone(110, 0.2, 3); // A2 slight detune for mystical feel
+
+  // Slow pulsing low frequency — heartbeat-like
+  function createPulse() {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(55, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start();
+
+    let t = audioCtx.currentTime + 2;
+    for (let i = 0; i < 200; i++) {
+      gain.gain.linearRampToValueAtTime(0.4, t);
+      gain.gain.linearRampToValueAtTime(0, t + 1.5);
+      t += 6; // slow pulse every 6 seconds
+    }
+  }
+  createPulse();
+
+  // Slow eerie melody — Egyptian feel
+  const melodyNotes = [293.66, 329.63, 349.23, 415.30, 440, 466.16, 554.37, 440, 415.30, 349.23, 329.63, 293.66];
+  const noteDuration = 3.5; // very slow
+
+  function playMelodyNote(noteIndex, startTime) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(melodyNotes[noteIndex % melodyNotes.length], startTime);
+
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(800, startTime);
+    filter.Q.setValueAtTime(2, startTime);
+
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(0.15, startTime + 0.8);
+    gain.gain.linearRampToValueAtTime(0.08, startTime + noteDuration - 0.5);
+    gain.gain.linearRampToValueAtTime(0, startTime + noteDuration);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+    osc.start(startTime);
+    osc.stop(startTime + noteDuration + 0.1);
+  }
+
+  // Schedule melody — starts after 3 seconds
+  let noteTime = audioCtx.currentTime + 3;
+  for (let i = 0; i < 100; i++) {
+    playMelodyNote(i, noteTime);
+    noteTime += noteDuration + 0.5;
+  }
+
+  // Reverb-like shimmer — very subtle high freq
+  function createShimmer() {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1760, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start();
+  }
+  createShimmer();
+}
+
+// Start music on first user interaction (browser requirement)
+document.addEventListener('click', startEgyptianMusic, { once: true });
+document.addEventListener('touchstart', startEgyptianMusic, { once: true });
+document.addEventListener('scroll', startEgyptianMusic, { once: true });
+</script>
+
+</body>
+</html>
